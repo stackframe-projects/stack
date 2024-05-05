@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 
-export async function SentryTestPage() {
+export default async function SentryTestPage() {
   cookies();
-  throw new Error('Sentry test error');
+  if (Math.random() < 2) {
+    throw new Error('Sentry test error. ' + JSON.stringify(process.env.CI));
+  }
 
   return <></>;
 }
