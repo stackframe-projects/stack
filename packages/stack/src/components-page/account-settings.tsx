@@ -84,41 +84,54 @@ function ProfileSection() {
 }
 
 function EmailVerificationSection() {
-  const user = useUser();
+  const user = useUser({ or: 'redirect' });
   const [emailSent, setEmailSent] = useState(false);
+
+  if (user.primaryEmailVerified) {
+    return null;
+  }
 
   return (
     <SettingSection
       title='Email Verification'
       desc='We want to make sure that you own the email address.'
       buttonDisabled={emailSent}
-      buttonText={
-        !user?.primaryEmailVerified ? 
-          emailSent ? 
-            'Email sent!' : 
-            'Send Email'
-          : undefined
-      }
+      buttonText={emailSent ? 'Email sent!' : 'Send Email'}
       onButtonClick={async () => {
-        await user?.sendVerificationEmail();
+        await user.sendVerificationEmail();
         setEmailSent(true);
       }}
     >
-      {user?.primaryEmailVerified ? 
-        <Text variant='success'>Your email has been verified</Text> : 
-        <Text variant='warning'>Your email has not been verified</Text>}
+      <Text variant='warning'>Your email has not been verified</Text>
+    </SettingSection>
+  );
+}
+
+function OAuthSection() {
+  const user = useUser({ or: 'redirect' });
+
+  return (
+    <SettingSection
+      title='OAuth'
+      desc='Manage your OAuth Sign-ins'
+    >
+      {user.oauthProviders.map((provider) => (
+        <div key={provider}>
+          <Text>{provider}</Text>
+        </div>
+      ))}
     </SettingSection>
   );
 }
 
 function PasswordSection() {
-  const user = useUser();
+  const user = useUser({ or: 'redirect' });
   const [oldPassword, setOldPassword] = useState<string>('');
   const [oldPasswordError, setOldPasswordError] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [newPasswordError, setNewPasswordError] = useState<string>('');
 
-  if (!user?.hasPassword) {
+  if (!user.hasPassword) {
     return null;
   }
 
@@ -206,6 +219,7 @@ export default function AccountSettings({ fullPage=false }: { fullPage?: boolean
       
       <ProfileSection />
       <EmailVerificationSection />
+      <OAuthSection />
       <PasswordSection />
       <SignOutSection />
     </div>
