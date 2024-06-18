@@ -41,6 +41,7 @@ export type ProjectUpdateOptions = {
     credentialEnabled?: boolean,
     magicLinkEnabled?: boolean,
     allowLocalhost?: boolean,
+    signUpEnabled?: boolean,
     createTeamOnSignUp?: boolean,
     emailConfig?: EmailConfigJson,
   },

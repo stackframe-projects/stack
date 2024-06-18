@@ -177,6 +177,7 @@ export async function createProject(
             allowLocalhost: projectOptions.config?.allowLocalhost ?? true,
             credentialEnabled: !!projectOptions.config?.credentialEnabled,
             magicLinkEnabled: !!projectOptions.config?.magicLinkEnabled,
+            signUpEnabled: !!projectOptions.config?.signUpEnabled ?? true,
             createTeamOnSignUp: !!projectOptions.config?.createTeamOnSignUp,
             emailServiceConfig: {
               create: {
@@ -473,6 +474,7 @@ export async function updateProject(
     data: { 
       credentialEnabled: options.config?.credentialEnabled,
       magicLinkEnabled: options.config?.magicLinkEnabled,
+      signUpEnabled:options.config?.signUpEnabled,
       allowLocalhost: options.config?.allowLocalhost,
       createTeamOnSignUp: options.config?.createTeamOnSignUp,
     },
@@ -535,6 +537,7 @@ export function projectJsonFromDbType(project: ProjectDB): ProjectJson {
       allowLocalhost: project.config.allowLocalhost,
       credentialEnabled: project.config.credentialEnabled,
       magicLinkEnabled: project.config.magicLinkEnabled,
+      signUpEnabled: project.config.signUpEnabled,
       createTeamOnSignUp: project.config.createTeamOnSignUp,
       domains: project.config.domains.map((domain) => ({
         domain: domain.domain,
@@ -596,6 +599,7 @@ const nonRequiredSchemas = {
     ).optional().default(undefined),
     credentialEnabled: yup.boolean().optional(),
     magicLinkEnabled: yup.boolean().optional(),
+    signUpEnabled: yup.boolean().optional(),
     allowLocalhost: yup.boolean().optional(),
     createTeamOnSignUp: yup.boolean().optional(),
     emailConfig: yup.object({
@@ -632,6 +636,7 @@ export const projectSchemaToUpdateOptions = (
       allowLocalhost: update.config.allowLocalhost,
       credentialEnabled: update.config.credentialEnabled,
       magicLinkEnabled: update.config.magicLinkEnabled,
+      signUpEnabled:update.config.signUpEnabled,
       createTeamOnSignUp: update.config.createTeamOnSignUp,
       oauthProviders: update.config.oauthProviders && update.config.oauthProviders.map((provider) => {
         if (sharedProviders.includes(provider.type as SharedProvider)) {

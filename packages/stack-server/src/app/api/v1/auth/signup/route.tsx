@@ -58,6 +58,10 @@ export const POST = deprecatedSmartRouteHandler(async (req: NextRequest) => {
     throw new StatusError(StatusError.Forbidden, "Password authentication is not enabled");
   }
 
+  if (!project.evaluatedConfig.signUpEnabled) {
+    throw new StatusError(StatusError.Forbidden, "new signup is not enabled");
+  }
+
   if (
     !validateUrl(
       emailVerificationRedirectUrl,

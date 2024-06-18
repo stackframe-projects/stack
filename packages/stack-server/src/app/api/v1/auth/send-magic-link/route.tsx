@@ -47,6 +47,10 @@ export const POST = deprecatedSmartRouteHandler(async (req: NextRequest) => {
     throw new StatusError(StatusError.Forbidden, "Magic link is not enabled for this project");
   }
 
+  if (!project.evaluatedConfig.signUpEnabled) {
+    throw new StatusError(StatusError.Forbidden, "new signup is not enabled");
+  }
+
   const users = await prismaClient.projectUser.findMany({
     where: {
       projectId,

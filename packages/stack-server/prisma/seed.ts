@@ -58,6 +58,7 @@ async function seed() {
           },
           credentialEnabled: true,
           magicLinkEnabled: true,
+          signUpEnabled: true,
           createTeamOnSignUp: false,
         },
       },

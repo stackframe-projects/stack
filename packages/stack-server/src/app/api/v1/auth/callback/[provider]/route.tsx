@@ -99,6 +99,10 @@ export const GET = deprecatedSmartRouteHandler(async (req: NextRequest, options:
     throw new StatusError(StatusError.NotFound, "Provider not found or not enabled");
   }
 
+  if (!project.evaluatedConfig.signUpEnabled) {
+    throw new StatusError(StatusError.Forbidden, "new signup is not enabled");
+  }
+  
   const userInfo = await getProvider(provider).getCallback({
     codeVerifier: innerCodeVerifier,
     state: innerState,

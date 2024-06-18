@@ -55,8 +55,22 @@ export default function PageClient() {
               });
             }}
           />;
-        })}      
+        })}
       </SettingCard>
-    </PageLayout>
+
+      <SettingCard title="User Settings" description="Toggle to enable/disable new User Sign-up">
+      <SettingSwitch
+        label="Signup"
+        checked={project.evaluatedConfig.signUpEnabled}
+        onCheckedChange={async (checked) => {
+          await project.update({
+            config: {
+              signUpEnabled: checked,
+            },
+          });
+        }}
+      />
+    </SettingCard>
+    </PageLayout >
   );
 }
