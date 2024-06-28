@@ -9,6 +9,7 @@ import { cookies } from '@stackframe/stack-sc';
 import { generateSecureRandomString } from '../utils/crypto';
 import { AccessToken, RefreshToken, InternalSession } from '../sessions';
 import { globalVar } from '../utils/globals';
+import { ServerUserJson } from './serverInterface';
 
 type UserCustomizableJson = {
   displayName: string | null,
@@ -944,6 +945,22 @@ export class StackClientInterface {
           "content-type": "application/json",
         },
         body: JSON.stringify(data),
+      },
+      session,
+    );
+    return await response.json();
+  }
+
+  async saveUpdateProfileImage(options:{userId:string,projectId:string,image:string},session:InternalSession):Promise<ServerUserJson>
+  {
+    const response = await this.sendClientRequest(
+      "/profile-image/",
+      {
+        method: "POST",
+        body: JSON.stringify(options),
+        headers:{
+          "content-type": "application/json",
+        },
       },
       session,
     );

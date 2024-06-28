@@ -818,6 +818,11 @@ class _StackClientAppImpl<HasTokenStore extends boolean, ProjectId extends strin
       updatePassword(options: { oldPassword: string, newPassword: string}) {
         return app._updatePassword(options, session);
       },
+      async saveUserProfileImage(options:{userId:string,projectId:string,image:string}){
+        const res = await app._interface.saveUpdateProfileImage(options,session);
+        await app._currentUserCache.refresh([session]);
+        return app._createBaseUser(res);;
+      }
     };
   }
 
@@ -1413,6 +1418,9 @@ class _StackServerAppImpl<HasTokenStore extends boolean, ProjectId extends strin
       async updatePassword(options: { oldPassword?: string, newPassword: string}) {
         return await app._checkFeatureSupport("updatePassword() on ServerUser", {});
       },
+      async saveUserProfileImage(options:{userId:string,projectId:string,image:string}){
+        throw new Error();
+      }
     };
   }
 
@@ -1935,6 +1943,8 @@ export type User =
     useConnectedAccount(id: StandardProvider, options?: { or?: 'redirect' | 'throw' | 'return-null', scopes?: string[] }): OAuthConnection | null,
 
     toClientJson(): UserJson,
+
+    saveUserProfileImage(options:{userId:string,projectId:string,image:string}) : Promise<BaseUser>,
   }
   & AsyncStoreProperty<"team", [id: string], Team | null, false>
   & AsyncStoreProperty<"teams", [], Team[], true>

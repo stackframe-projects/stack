@@ -1,12 +1,16 @@
 'use client';
 
-import React from 'react';
+import React,{ useRef } from 'react';
 import { useUser } from '..';
 import { PredefinedMessageCard } from '../components/message-cards/predefined-message-card';
 import { UserAvatar } from '../components/elements/user-avatar';
 import { useState } from 'react';
 import { FormWarningText } from '../components/elements/form-warning';
 import { getPasswordError } from '@stackframe/stack-shared/dist/helpers/password';
+import {Pencil2Icon} from "@radix-ui/react-icons";
+import {Slider,Modal, Sheet} from '@mui/joy';
+import AvatarEditor from "react-avatar-editor";
+import imageCompression from 'browser-image-compression';
 import { Button, Card, CardContent, CardFooter, CardHeader, Container, Input, Label, PasswordInput, Typography, cn } from '@stackframe/stack-ui';
 
 function SettingSection(props: {
@@ -50,7 +54,71 @@ function ProfileSection() {
   const user = useUser();
   const [userInfo, setUserInfo] = useState<{ displayName: string }>({ displayName: user?.displayName || '' });
   const [changed, setChanged] = useState(false);
-
+  const [open,setOpen]=useState(false);
+  const [slideValue, setSlideValue] = useState(10);
+  const cropRef = useRef<AvatarEditor>(null);
+  const [uploadAvatar,setUploadAvatar]=useState('');
+  const fileUploadRef = useRef<HTMLInputElement>(null);
+  const handleImageUpload = () => {
+    if (fileUploadRef.current) {
+    fileUploadRef.current.click();
+    }
+  };
+  const uploadImageDisplay =  () => {
+    if (fileUploadRef.current?.files) {
+      const uploadedFile = fileUploadRef.current.files[0];
+      const maxSizeInBytes = (1 * 1024 * 1024)/2;
+      let options={};
+      if (uploadedFile.size < maxSizeInBytes){
+        options={
+          fileType:"image/jpeg",
+        };
+      }
+      else {
+        options = {
+          maxSizeMB: 0.5,
+          fileType:"image/jpeg",
+        };
+      }
+      imageCompression(uploadedFile, options)
+        .then(compressedFile => readFileAsDataURL(compressedFile))
+        .then(fileData => {
+        setUploadAvatar(fileData);
+        setOpen(true);
+        })
+        .catch(error => {
+        console.error('Image processing failed:', error);
+        });
+    }
+  };
+  const readFileAsDataURL = (file: File): Promise<string>=> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+  const handleSliderChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    setSlideValue(Number(target.value));
+  };
+  const handleSave = async () => {
+    if (cropRef.current) {
+      const dataUrl = cropRef.current.getImage().toDataURL('image/jpeg');
+      if (user){
+        const uploadedImageData={
+          "userId":user.id,
+          "projectId":user.projectId,
+          "image":dataUrl
+        };
+        const saveProfileImage=await user.saveUserProfileImage(uploadedImageData);
+      }
+    setOpen(false);
+    setUploadAvatar(dataUrl);
+    setSlideValue(10);
+    }
+  };
   return (
     <SettingSection
       title='Profile'
@@ -62,6 +130,83 @@ function ProfileSection() {
         setChanged(false);
       }}
     >
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <UserAvatar user={user} size={50}/>
+          <input type="file" id="file" ref={fileUploadRef} accept="image/*" onChange={uploadImageDisplay} hidden/>
+          <div 
+            onClick={handleImageUpload} 
+            style={{ 
+              position: 'absolute', 
+              bottom: 0, 
+              right: 0, 
+              cursor: 'pointer',
+              border: 'none', 
+            }}
+          >
+            <Pencil2Icon className="h-4 w-4"/>
+          </div>
+        </div>
+        <Modal
+          aria-labelledby="modal-title"
+          aria-describedby="modal-desc"
+          open={open}
+          onClose={() => setOpen(false)}
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',  
+            outline: 'none' 
+          }}
+        >
+          <Sheet
+            variant="outlined"
+            sx={{
+              maxWidth: 500,
+              borderRadius: 'md',
+              p: 3,
+              boxShadow: 'lg',
+              backgroundColor: 'transparent',
+              border: 'none',
+              outline: 'none',
+              textAlign: 'center'
+            }}
+          >
+            <AvatarEditor
+              ref={cropRef}
+              image={uploadAvatar || ""}
+              style={{ width: "100%", height: "100%", outline: 'none' }}
+              borderRadius={150}
+              color={[0, 0, 0, 0.72]}
+              scale={slideValue / 10}
+              rotate={0}
+            />
+            <Slider
+              min={10}
+              max={50}
+              sx={{
+                margin: "20px auto",
+                width: "80%",
+                color: "cyan",
+                display: 'block'
+              }}
+              defaultValue={slideValue}
+              value={slideValue}
+              onChange={handleSliderChange}
+            />
+            <Button variant="warning" onClick={() => setOpen(false)} style={{marginRight: '120px'}}>
+            Cancel
+            </Button>
+            <Button variant="primary"
+              onClick={handleSave}  style={{marginLeft: '120px'}}
+            >
+            Save
+            </Button>
+          </Sheet>
+        </Modal>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <Text>{user?.displayName}</Text>
+          <Text variant='secondary' size='sm'>{user?.primaryEmail}</Text>
       <div className='flex gap-4 items-center'>
         <UserAvatar user={user} size={50}/>
         <div className='flex flex-col'>

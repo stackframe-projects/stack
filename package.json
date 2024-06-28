@@ -32,6 +32,7 @@
     "@changesets/cli": "^2.27.1",
     "@testing-library/react": "^15.0.2",
     "@types/node": "^20.8.10",
+    "@types/react-avatar-editor": "^13.0.2",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.x",
     "@typescript-eslint/parser": "^6.x",
